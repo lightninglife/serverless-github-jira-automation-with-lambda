@@ -1,0 +1,47 @@
+service: ${env:SERVICE_NAME}
+
+provider:
+  name: ${env:AWS_PROVIDER_NAME}
+  runtime: ${env:AWS_RUNTIME}
+  stage: dev # ${env:STAGE}
+  region: ${env:AWS_REGION}
+configValidationMode: off # Disable provider validation warning
+
+custom:
+  # Add the variablesResolutionMode option here
+  variablesResolutionMode: 20210326
+
+functions:
+  GithubJiraAutomation:
+    handler: ${env:LAMBDA_HANDLER}
+    events:
+      - http:
+          path: ${env:API_PATH}
+          method: ${env:API_METHOD}
+    package:
+      artifact: ${env:LAMBDA_FUNCTION}
+    environment:
+      github_secret: ${env:github_secret_value}
+      jira_api_endpoint: ${env:jira_api_endpoint_value}
+      jira_api_token: ${env:jira_api_token_value}
+      project_key: ${env:project_key_value}
+      jira_user: ${env:jira_username_value}
+      
+    
+layers:
+  jira:
+    path: ${env:JIRA_LAYER_PATH}
+    compatibleRuntimes:
+      - ${env:LAYER_RUN_TIME}
+
+
+plugins:
+  - serverless-python-requirements
+package:
+  individually: true
+  exclude:
+    - ${env:EXCLUDE_PATTERNS}
+  include:
+    - ${env:INCLUDE_PATTERNS}
+
+useDotenv: true
